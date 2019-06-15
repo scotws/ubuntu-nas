@@ -1,0 +1,225 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Scot’s Ubuntu NAS with ZFS and Containers &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="scot-s-ubuntu-nas-with-zfs-and-containers">
+<h1>Scot’s Ubuntu NAS with ZFS and Containers<a class="headerlink" href="#scot-s-ubuntu-nas-with-zfs-and-containers" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="goals.html#house-overview">House overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="goals.html#network">Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="goals.html#nas-duties">NAS duties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="goals.html#threat-assessment">Threat assessment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="goals.html#nas-overview">NAS overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#motherboard">Motherboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#drives">Drives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#extra-cooling-fan">Extra cooling fan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#other-hardware">Other hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#ipmi">IPMI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#bios">BIOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware.html#lsi-interface">LSI interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="os.html#memory-test">Memory Test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="os.html#basic-installation">Basic installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="livepatch.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#mdns-avahi">mDNS (Avahi)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#network">Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#ssh">SSH</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mail.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="smart.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ups.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="zfs.html#the-current-setup">The current setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zfs.html#email-notifications">Email notifications</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#glances">Glances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#emby">Emby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#watchtower">Watchtower</a></li>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#time-machine">Time Machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nfs.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="snapshots.html#deleting-snapshots">Deleting snapshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rsync.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="firewall.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="speed.html#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="speed.html#links">Links</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="introduction.html" title="next chapter">Introduction</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

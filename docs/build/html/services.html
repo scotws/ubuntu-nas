@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Services &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Users" href="users.html" />
+    <link rel="prev" title="Livepatch" href="livepatch.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="services">
+<h1>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="mdns-avahi">
+<h2>mDNS (Avahi)<a class="headerlink" href="#mdns-avahi" title="Permalink to this headline">¶</a></h2>
+<p>Zero configuration, also known as mDNS or Avahi on Linux, is not installed by
+default with Ubuntu Server. This means we can’t access <code class="docutils literal notranslate"><span class="pre">.local</span></code> addresses.
+This is our primary main way of talking to machines. We will want to do this via
+the console.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">avahi</span><span class="o">-</span><span class="n">daemon</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">avahi</span><span class="o">-</span><span class="n">utils</span>
+</pre></div>
+</div>
+<p>Note we will have to punch a hole in the firewall later for <code class="docutils literal notranslate"><span class="pre">UDP</span> <span class="pre">5353</span></code> for
+local machines.</p>
+<p>To get a list of machines on the network, use</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">avahi</span><span class="o">-</span><span class="n">browse</span> <span class="o">-</span><span class="n">a</span>
+</pre></div>
+</div>
+<div class="section" id="links">
+<h3>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://kb.iweb.com/hc/en-us/articles/360005117952-Guide-to-Multicast-DNS-mDNS-security-issues">https://kb.iweb.com/hc/en-us/articles/360005117952-Guide-to-Multicast-DNS-mDNS-security-issues</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="network">
+<h2>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h2>
+<p>We want home to have a static address. In fact, our network is small and
+unchanging enough we can use static addresses for a lot of things.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">netplan</span><span class="o">/</span><span class="mi">50</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">init</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>We change this to:</p>
+<div class="code yaml highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span><span class="p">:</span>
+    <span class="n">ethernets</span><span class="p">:</span>
+        <span class="n">eno1</span><span class="p">:</span>
+            <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">13.2</span><span class="o">/</span><span class="mi">24</span><span class="p">]</span>
+            <span class="n">gateway4</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">13.1</span>
+            <span class="n">nameservers</span><span class="p">:</span>
+              <span class="n">addresses</span><span class="p">:</span> <span class="p">[</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">13.8</span><span class="p">,</span><span class="mf">8.8</span><span class="o">.</span><span class="mf">8.8</span><span class="p">]</span>
+            <span class="n">dhcp4</span><span class="p">:</span> <span class="n">no</span>
+        <span class="n">eno2</span><span class="p">:</span>
+            <span class="n">dhcp4</span><span class="p">:</span> <span class="n">true</span>
+        <span class="n">eno7</span><span class="p">:</span>
+            <span class="n">dhcp4</span><span class="p">:</span> <span class="n">true</span>
+        <span class="n">eno8</span><span class="p">:</span>
+            <span class="n">dhcp4</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Despite the scary text in the file, this survives reboots every time. Here,
+restart the network. From the terminal, execute</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">netplan</span> <span class="n">apply</span>
+</pre></div>
+</div>
+<p>In the router, make sure that we get the same address every time via DHCP for
+this machine.</p>
+<div class="section" id="id1">
+<h3>Links<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://websiteforstudents.com/configure-static-ip-addresses-on-ubuntu-18-04-beta/">https://websiteforstudents.com/configure-static-ip-addresses-on-ubuntu-18-04-beta/</a></li>
+<li><a class="reference external" href="https://www.ostechnix.com/how-to-configure-ip-address-in-ubuntu-18-04-lts/">https://www.ostechnix.com/how-to-configure-ip-address-in-ubuntu-18-04-lts/</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="ssh">
+<h2>SSH<a class="headerlink" href="#ssh" title="Permalink to this headline">¶</a></h2>
+<p>Though we use the console for lots of stuff, in practice, we’ll want to be able
+to access the server via ssh. Remember chell is the jump server for home, other
+machines should not be able to access it.</p>
+<p>We change a bunch of options to “harden” the server. We start by editing
+<code class="docutils literal notranslate"><span class="pre">/etc/ssh/sshd_config</span></code>:</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AllowUsers</span> <span class="n">user1</span>
+<span class="n">ClientAliveCountMax</span> <span class="mi">0</span>
+<span class="n">ClientAliveInterval</span> <span class="mi">300</span>
+<span class="n">IgnoreRhosts</span> <span class="n">yes</span>
+<span class="n">LoginGraceTime</span> <span class="mi">2</span><span class="n">m</span>
+<span class="n">MaxAuthTries</span> <span class="mi">5</span>
+<span class="n">MaxSessions</span> <span class="mi">3</span>
+<span class="n">PermitEmptyPasswords</span> <span class="n">no</span>
+<span class="n">PermitRootLogin</span> <span class="n">no</span>
+<span class="n">Port</span> <span class="mi">2019</span>
+<span class="n">PrintMotd</span> <span class="n">yes</span>
+<span class="n">Protocol</span> <span class="mi">2</span>
+<span class="n">X11Forwarding</span> <span class="n">no</span>
+</pre></div>
+</div>
+<p>Note that we change the default port (to the year this was written). We’ll go
+over some of these later when we take a look at the firewall. Then restart the
+ssh demon.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">restart</span> <span class="n">ssdh</span>
+</pre></div>
+</div>
+<p>We don’t want to let anybody log in with just their password, instead, we need
+them to have <em>public keys</em> generated on chell. We will then copy it over from
+there to home. Don’t use a passphrase when prompted:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span>
+<span class="n">cat</span> <span class="o">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span><span class="o">.</span><span class="n">pub</span>
+<span class="n">ssh</span><span class="o">-</span><span class="n">copy</span><span class="o">-</span><span class="nb">id</span> <span class="o">-</span><span class="n">p</span> <span class="mi">2019</span> <span class="o">-</span><span class="n">i</span> <span class="o">~/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span><span class="o">.</span><span class="n">pub</span> <span class="n">user1</span><span class="nd">@home</span><span class="o">.</span><span class="n">local</span>
+</pre></div>
+</div>
+<p>On home, we then edit <code class="docutils literal notranslate"><span class="pre">/etc/sshd_config</span></code> to include:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PubkeyAuthentication</span> <span class="n">yes</span>
+<span class="n">PasswordAuthentication</span> <span class="n">no</span>
+</pre></div>
+</div>
+<p>Restart again. Because logging in with a different port and all of that gets old
+fast, we create a file <code class="docutils literal notranslate"><span class="pre">~/.ssh/config</span></code> on home with the content:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Host</span> <span class="n">home</span>
+    <span class="n">Hostname</span> <span class="n">home</span><span class="o">.</span><span class="n">local</span>
+    <span class="n">User</span> <span class="n">user1</span>
+    <span class="n">Port</span> <span class="mi">2019</span>
+</pre></div>
+</div>
+<p>Now we can just login from chell with <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">home</span></code> as user1. We cannot just log
+in via password. Remember chell is the jump server for home.</p>
+<div class="section" id="id2">
+<h3>Links<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://linux-audit.com/audit-and-harden-your-ssh-configuration/">https://linux-audit.com/audit-and-harden-your-ssh-configuration/</a></li>
+<li><a class="reference external" href="https://linux-audit.com/using-ssh-keys-instead-of-passwords/">https://linux-audit.com/using-ssh-keys-instead-of-passwords/</a>)</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals and objectives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Services</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mdns-avahi">mDNS (Avahi)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network">Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ssh">SSH</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="livepatch.html" title="previous chapter">Livepatch</a></li>
+      <li>Next: <a href="users.html" title="next chapter">Users</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/services.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

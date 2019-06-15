@@ -1,0 +1,43 @@
+Security audits
+===============
+
+We use Lynis to look for security holes. Unfortunately, Ubuntu (again) contains
+an old version. The following is how get the newest version:
+
+.. code:: bash
+
+        dpkg -s apt-transport-https | grep -i status
+
+Shows us that the HTTPS transport is not installed. Do this with
+
+.. code:: bash
+
+        sudo apt-get install apt-transport-https
+
+Now that we can use HTTPS we can install the program itself.
+
+.. code:: bash
+
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C80E383C3DE9F082E01391A0366C67DE91CA5D5F
+        echo "deb https://packages.cisofy.com/community/lynis/deb/ stable main" | sudo tee /etc/apt/sources.list.d/cisofy-lynis.list
+        sudo apt update
+        sudo apt install lynis
+
+Finally we're ready to rock:
+
+.. code:: bash
+
+        sudo lynis audit system | less -R
+
+Walk through the output and figure out how to secure stuff.
+
+.. code:: bash
+
+        cat /var/log/lynis.log | grep Suggestion
+
+Links
+-----
+
+* https://packages.cisofy.com/community/#debian-ubuntu
+* https://www.digitalocean.com/community/tutorials/how-to-perform-security-audits-with-lynis-on-ubuntu-16-04
+* https://cisofy.com/lynis/controls/

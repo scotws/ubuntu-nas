@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Containers &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="NFS" href="nfs.html" />
+    <link rel="prev" title="ZFS" href="zfs.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="containers">
+<h1>Containers<a class="headerlink" href="#containers" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We currently use Docker, though Podman might make more sense for a
+system this size because it doesn’t need a separate demon and doesn’t
+run with root. However, Ubuntu currently has better support for Docker
+than Podman.</p>
+</div>
+<p>You will remember we didn’t install Docker during the setups of the operating
+system because that would have given us the wrong version.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is the easy way to install, though it doesn’t give you the newest
+version (a common problem with Ubuntu). See
+<a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04">https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04</a>
+for instructions on how to install the program from the official Docker
+repository.</p>
+</div>
+<p>The basic install of Docker is with</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">docker</span><span class="o">.</span><span class="n">io</span>
+<span class="n">sudo</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<p>The second line is responsible for autostarting. What follows are the
+individual container installations. We also install a container for Time Machine
+backups, but we’ll get to that later.</p>
+<div class="section" id="glances">
+<h2>Glances<a class="headerlink" href="#glances" title="Permalink to this headline">¶</a></h2>
+<p>Glances provides an overview of the system. Though there are monitors that
+provide more information, this seems to be a good balance of size and function
+for a NAS with our profile.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">pull</span> <span class="n">nicolargo</span><span class="o">/</span><span class="n">glances</span>
+</pre></div>
+</div>
+<p>Create a folder <code class="docutils literal notranslate"><span class="pre">/root/Docker-scripts</span></code>. There, create a file <code class="docutils literal notranslate"><span class="pre">glances-docker.sh</span></code>:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> \
+<span class="o">--</span><span class="n">name</span> <span class="n">glances</span><span class="o">-</span><span class="n">home</span> \
+<span class="o">--</span><span class="n">restart</span> <span class="n">unless</span><span class="o">-</span><span class="n">stopped</span> \
+<span class="o">--</span><span class="n">publish</span> <span class="mi">61208</span><span class="o">-</span><span class="mi">61209</span><span class="p">:</span><span class="mi">61208</span><span class="o">-</span><span class="mi">61209</span>  \
+<span class="o">--</span><span class="n">env</span> <span class="n">GLANCES_OPT</span><span class="o">=</span><span class="s2">&quot;-w&quot;</span> \
+<span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="n">ro</span> \
+<span class="o">--</span><span class="n">pid</span> <span class="n">host</span> \
+<span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nicolargo</span><span class="o">/</span><span class="n">glances</span>
+</pre></div>
+</div>
+<p>We start with is <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">./glances-docker.sh</span></code>. To reach the interface, go to
+<a class="reference external" href="http://home.local:61208">http://home.local:61208</a> .</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This might need some tweaking, because Glances is unhappy when 70 percent
+of memory is used, which is normal for a NAS.</p>
+</div>
+</div>
+<div class="section" id="emby">
+<h2>Emby<a class="headerlink" href="#emby" title="Permalink to this headline">¶</a></h2>
+<p>Emby is one of three options for TV and movie streaming, the other two are Plex
+and JellyFin. We create a volume for configuration files, so we don’t have to
+reorganize every time there is a new version.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">pull</span> <span class="n">emby</span><span class="o">/</span><span class="n">embyserver</span><span class="p">:</span><span class="n">latest</span>
+<span class="n">sudo</span> <span class="n">docker</span> <span class="n">volume</span> <span class="n">create</span> <span class="n">emby</span><span class="o">-</span><span class="n">config</span>
+</pre></div>
+</div>
+<p>Create a file in <code class="docutils literal notranslate"><span class="pre">/root/Docker-scripts/</span></code> named <code class="docutils literal notranslate"><span class="pre">emby-docker.sh</span></code> with the
+content:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> \
+<span class="o">--</span><span class="n">name</span> <span class="n">emby</span><span class="o">-</span><span class="n">home</span> \
+<span class="o">--</span><span class="n">volume</span> <span class="n">emby</span><span class="o">-</span><span class="n">config</span><span class="p">:</span><span class="o">/</span><span class="n">config</span> \
+<span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">movies</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">movies</span><span class="p">:</span><span class="n">ro</span> \
+<span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">media</span><span class="o">/</span><span class="n">series</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">tv</span><span class="p">:</span><span class="n">ro</span> \
+<span class="o">--</span><span class="n">publish</span> <span class="mi">8096</span><span class="p">:</span><span class="mi">8096</span> \
+<span class="o">--</span><span class="n">publish</span> <span class="mi">8920</span><span class="p">:</span><span class="mi">8920</span> \
+<span class="o">--</span><span class="n">restart</span> <span class="n">unless</span><span class="o">-</span><span class="n">stopped</span> \
+<span class="o">--</span><span class="n">env</span> <span class="n">UID</span><span class="o">=</span><span class="mi">1000</span> \
+<span class="o">--</span><span class="n">env</span> <span class="n">GID</span><span class="o">=</span><span class="mi">1000</span> \
+<span class="n">emby</span><span class="o">/</span><span class="n">embyserver</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>The actual media files are kept in the ZFS datasets <code class="docutils literal notranslate"><span class="pre">tank/media</span></code>, and we pass
+them <code class="docutils literal notranslate"><span class="pre">ro</span></code> (read-only) to be paranoid. Run it and setup at
+<a class="reference external" href="http://home.local:8096">http://home.local:8096</a> . During setup, set thread count to 4 for the moment.</p>
+<div class="section" id="configuration-backups">
+<h3>Configuration backups<a class="headerlink" href="#configuration-backups" title="Permalink to this headline">¶</a></h3>
+<p>We keep a backup of the <code class="docutils literal notranslate"><span class="pre">emby-config</span></code> volume from
+<code class="docutils literal notranslate"><span class="pre">/var/lib/docker/volumes/emby-config</span></code> at <code class="docutils literal notranslate"><span class="pre">/tank/storage/BKU</span> <span class="pre">Emby/</span></code>. The
+uncompressed size (02. June 2019) is about 3 GB.</p>
+</div>
+</div>
+<div class="section" id="watchtower">
+<h2>Watchtower<a class="headerlink" href="#watchtower" title="Permalink to this headline">¶</a></h2>
+<p>Watchtower is a program to automatically update other containers. This seems a
+bit overkill for our small collection, but we might as well set it up.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">docker</span> <span class="n">pull</span> <span class="n">v2tec</span><span class="o">/</span><span class="n">watchtower</span>
+</pre></div>
+</div>
+<p>Create <code class="docutils literal notranslate"><span class="pre">watchtower-docker.sh</span></code> file in the usual folder, configured to run once
+a night:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> \
+<span class="o">--</span><span class="n">name</span> <span class="n">watchtower</span><span class="o">-</span><span class="n">home</span> \
+<span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span> \
+<span class="n">v2tec</span><span class="o">/</span><span class="n">watchtower</span> <span class="o">--</span><span class="n">schedule</span> <span class="s2">&quot;0 0 5 * * *&quot;</span> <span class="o">--</span><span class="n">cleanup</span>
+</pre></div>
+</div>
+<p>This runs the check once a day at five in the morning and gets rid of old stuff
+once it has updated.</p>
+</div>
+<div class="section" id="time-machine">
+<h2>Time Machine<a class="headerlink" href="#time-machine" title="Permalink to this headline">¶</a></h2>
+<p>We do this with Docker because Ubuntu (again) uses an ancient version of
+netatalk.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">dit</span> \
+  <span class="o">--</span><span class="n">name</span> <span class="n">timemachine</span><span class="o">-</span><span class="n">home</span>
+  <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+  <span class="o">-</span><span class="n">v</span> <span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">TM_mediator</span><span class="p">:</span><span class="o">/</span><span class="n">timemachine</span>
+  <span class="o">-</span><span class="n">p</span> <span class="mi">548</span><span class="p">:</span><span class="mi">548</span>
+  <span class="o">-</span><span class="n">p</span> <span class="mi">636</span><span class="p">:</span><span class="mi">636</span>
+  <span class="o">--</span><span class="n">ulimit</span> <span class="n">nofile</span><span class="o">=</span><span class="mi">65536</span><span class="p">:</span><span class="mi">65536</span>
+<span class="n">odarriba</span><span class="o">/</span><span class="n">timemachine</span>
+</pre></div>
+</div>
+<p>We have to run another line:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="n">timemachine</span><span class="o">-</span><span class="n">home</span> <span class="n">add</span><span class="o">-</span><span class="n">account</span> <span class="n">user1</span> <span class="o">&lt;</span><span class="n">PASSWORD</span><span class="o">&gt;</span> <span class="n">Hive</span><span class="o">-</span><span class="n">TM</span> <span class="o">/</span><span class="n">timemachine</span>
+</pre></div>
+</div>
+<p>On the Mac, use COMMAND-K to input <code class="docutils literal notranslate"><span class="pre">afp://192.168.13.2/Hive-TM</span></code> which is the name of
+the share. This could probably be home.local as well. Mount the drive that way
+by hand and then configure it as a new Time Machine backup drive.</p>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://hub.docker.com/r/v2tec/watchtower/">https://hub.docker.com/r/v2tec/watchtower/</a></li>
+<li><a class="reference external" href="https://godoc.org/github.com/robfig/cron#hdr-CRON_Expression_Format">https://godoc.org/github.com/robfig/cron#hdr-CRON_Expression_Format</a></li>
+<li><a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04">https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04</a></li>
+<li><a class="reference external" href="https://github.com/nicolargo/glances">https://github.com/nicolargo/glances</a></li>
+<li><a class="reference external" href="https://glances.readthedocs.io/en/stable/docker.html">https://glances.readthedocs.io/en/stable/docker.html</a></li>
+<li><a class="reference external" href="https://glances.readthedocs.io/en/stable/cmds.html#interactive-commands">https://glances.readthedocs.io/en/stable/cmds.html#interactive-commands</a></li>
+<li><a class="reference external" href="https://hub.docker.com/r/odarriba/timemachine/">https://hub.docker.com/r/odarriba/timemachine/</a></li>
+<li><a class="reference external" href="https://github.com/odarriba/docker-timemachine">https://github.com/odarriba/docker-timemachine</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals and objectives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#glances">Glances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#emby">Emby</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#watchtower">Watchtower</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-machine">Time Machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="zfs.html" title="previous chapter">ZFS</a></li>
+      <li>Next: <a href="nfs.html" title="next chapter">NFS</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/containers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

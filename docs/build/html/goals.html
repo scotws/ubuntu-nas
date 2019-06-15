@@ -1,0 +1,251 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Goals &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Hardware" href="hardware.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="goals">
+<h1>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h1>
+<p>This introduces the basic setup in the house where the NAS will be installed,
+the other machines on the network, and some of the names and addresses used.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Some of this information differs from the actual setup for security
+reasons. It is possible that this has created inconsistencies at some
+points when I didn’t pay attention. Please report these as errors.</p>
+</div>
+<div class="section" id="house-overview">
+<h2>House overview<a class="headerlink" href="#house-overview" title="Permalink to this headline">¶</a></h2>
+<p>The NAS is part of a computer setup in a single-family house with four human
+users and two cats. The local network is not accessible from the outside.
+Internet connection is through a DSL modem, which also (currently) serves as the
+DHCP server. The local DNS connection goes through PiHole (<a class="reference external" href="https://pi-hole.net/">https://pi-hole.net/</a>)
+on a Raspberry Pi.</p>
+<p>There are also Windows computers in the house, mainly for gaming, but they are
+considered <strong>untrusted</strong> by default and may not access the NAS.</p>
+<p>Various people work at various strange times in the house, so the Raspberry Pi
+and the NAS itself are on all the time. Also, cats have weird sleep schedules.</p>
+</div>
+<div class="section" id="network">
+<h2>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h2>
+<p>To keep things simple, all machines will be considered to be part of the IPv4
+local network 192.168.13.0/24. For the purpose of this document, the server’s
+name will be <strong>home</strong> and the main computer we work from <strong>chell</strong>, after the
+character in the Valve computer game. Most machines are assigned <em>static
+addresses</em>. In particular:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="30%" />
+<col width="18%" />
+<col width="32%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>home</td>
+<td>192.168.13.2</td>
+<td>NAS</td>
+<td>Ubuntu Server</td>
+</tr>
+<tr class="row-even"><td>chell</td>
+<td>192.168.13.20</td>
+<td>user PC</td>
+<td>Ubuntu Desktop</td>
+</tr>
+<tr class="row-odd"><td>worker</td>
+<td>192.168.13.21</td>
+<td>user PC</td>
+<td>Ubuntu Desktop</td>
+</tr>
+<tr class="row-even"><td>mediator</td>
+<td>192.168.13.22</td>
+<td>laptop</td>
+<td>MacOS</td>
+</tr>
+</tbody>
+</table>
+<p>There are also various other machines such as mobile phones, Chromebooks and
+iPads that connect to the network but are not relevant here.</p>
+<p>In practice, most user addressing uses mDNS (zero configuration) internally. As
+we will see later, this means we access the NAS with commands such as</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">home</span><span class="o">.</span><span class="n">local</span>
+</pre></div>
+</div>
+<p>This has the pleasant side effect of automatically locking out the Windows
+machines, which do not support zero configuration out of the box.</p>
+</div>
+<div class="section" id="nas-duties">
+<h2>NAS duties<a class="headerlink" href="#nas-duties" title="Permalink to this headline">¶</a></h2>
+<p>The NAS in this house is expected to provide the following services, in order of
+importance:</p>
+<ul class="simple">
+<li>Storage for documents and media, especially family photos</li>
+<li>Auto backup for the users’ data from Linux and MacOS machines (not: Windows)</li>
+<li>Low-traffic Emby server (usually only one user)</li>
+<li>Serve NFS shares to one other Ubuntu machine chell</li>
+<li>Allow experimenting with containers and virtual machines</li>
+</ul>
+<p>In the future, other functions might be added such as game server or a family
+chat bot.</p>
+<p>The storage function has the highest priority, especially for family photos,
+which are considered irreplaceable. As such, they must be protected from bitrot
+by a <em>self-healing file system</em>. In practice, this means either ZFS or Btrfs. ZFS
+has been in production longer, and Btrfs is far less battle-tested and comes
+with various warnings about how things are (still) not production ready.
+Therefore, ZFS is the main mass storage file system for the NAS.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">At the most basic level, this NAS is a life-support system for
+ZFS.</p>
+</div>
+<p>The other functions are secondary.</p>
+</div>
+<div class="section" id="threat-assessment">
+<h2>Threat assessment<a class="headerlink" href="#threat-assessment" title="Permalink to this headline">¶</a></h2>
+<p>The NAS is operating in a low-threat environment. It is not accessible from the
+internet, there is especially no VPN or other (known) way to reach it from
+outside. The machine itself is physically secured in the sense that if bad
+people are in my house, the threat to the NAS will not be my first concern.
+Still, the setup will follow <em>best practices</em> as far as possible with hardening
+and firewall.</p>
+<p>The main threat here is <strong>data loss</strong> through hard drive failure, power outage,
+cat intervention, or other such factors. The main strategy here is <em>multiple
+redundant backups</em>, some of them off-site.</p>
+<p>The secondary threat is <strong>user screw-ups</strong>, especially accidentally deleting
+data.</p>
+</div>
+<div class="section" id="nas-overview">
+<h2>NAS overview<a class="headerlink" href="#nas-overview" title="Permalink to this headline">¶</a></h2>
+<p>Though the NAS can be accessed directly by the console, mostly it will be
+administered from the computer chell. This functions as a <strong>jump server</strong> - other
+machines will be barred from accessing the NAS as much as possible. Since chell
+is powered down when not in use, this means that accessing the NAS through the
+network using ssh is usually not possible at all.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Goals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#house-overview">House overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network">Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nas-duties">NAS duties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#threat-assessment">Threat assessment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nas-overview">NAS overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="hardware.html" title="next chapter">Hardware</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/goals.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

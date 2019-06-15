@@ -1,0 +1,214 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Hardware &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ubuntu Server" href="os.html" />
+    <link rel="prev" title="Goals" href="goals.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="hardware">
+<h1>Hardware<a class="headerlink" href="#hardware" title="Permalink to this headline">¶</a></h1>
+<p>Most of the hardware was taken from the previous FreeNAS install.</p>
+<div class="section" id="motherboard">
+<h2>Motherboard<a class="headerlink" href="#motherboard" title="Permalink to this headline">¶</a></h2>
+<p>The main difference is the new motherboard, a <a class="reference external" href="https://www.supermicro.com/products/motherboard/Xeon/D/X10SDV-4C-7TP4F.cfm">Supermicro X10SDV-4C-7TP4F</a>
+Out of the box, you can attach <strong>20 SATA 3.0 drives</strong> and install <strong>one M.2 NVMe
+PCIe 3.0</strong> memory stick. This is currently not used, as are the <strong>two SFP+ 10
+GBit Ethernet</strong> ports. They are for later expansions.</p>
+<p>The processor is an <strong>Intel Xeon D-1518 4/8 core 2.20 GHz</strong>, which is overkill
+for current use but should be powerful enough for later virtual machines.</p>
+</div>
+<div class="section" id="drives">
+<h2>Drives<a class="headerlink" href="#drives" title="Permalink to this headline">¶</a></h2>
+<p>In this first incarnation, the <strong>root file system</strong> for Ubuntu 18.04 LTS is
+on a 120 GB Intel 540S SSD. Root on ZFS is still too complicated for this
+project.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">At time of writing, ZFS on Linux 0.8 was not yet integrated to the
+Ubuntu kernel, this is using 0.7.9-3ubuntu6</p>
+</div>
+<p>The <strong>mass storage</strong> was inherited from the FreeNAS build and consists of one
+ZFS pool (“tank”) constructed from two RaidZ VDEVs in 3/3/3 TB and 4/4/4 TB
+configuration. The total size is 14 TB on six drives.</p>
+</div>
+<div class="section" id="extra-cooling-fan">
+<h2>Extra cooling fan<a class="headerlink" href="#extra-cooling-fan" title="Permalink to this headline">¶</a></h2>
+<p>The X10SDV-4C-7TP4F is shipped without a CPU cooler, which doesn’t work. Instead
+of buying an extra cooler and replacing the passive heat sink, we install a
+jury-rigged fan that blows air on the heat sink.</p>
+</div>
+<div class="section" id="other-hardware">
+<h2>Other hardware<a class="headerlink" href="#other-hardware" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>RAM:</strong> 2 x 8 GB DDR4 ECC RAM</dt>
+<dd>This is left over from a different project. As finances allow, these
+will be replaces by 4 x 16 GB ECC RAM for a total of 64 GB. Though ZFS
+loves RAM and the maximum for the board is 128 GB, this should be enough
+for our use.</dd>
+<dt><strong>Graphics:</strong> In contrast to the usual setup with servers, there is an old 4:3</dt>
+<dd>monitor attached with VGA. Also, there is keyboard. Both are in the same
+room as the main computer. This means we can do stuff directly at the
+console which otherwise would require ssh.</dd>
+<dt><strong>Case:</strong> Fractal Design Define R5 White FD-CA-DEF-R5-WT</dt>
+<dd>Chosen for the soundproofing, provides easy storage for eight HDs and
+two SSDs.</dd>
+</dl>
+<p><strong>UPS:</strong> APC Back-UPS 700VA BX700U-GR</p>
+<p><strong>Power:</strong> Seasonic SSR-450RM Active PFC G-450 (450W, ATX 12V)</p>
+</div>
+<div class="section" id="ipmi">
+<h2>IPMI<a class="headerlink" href="#ipmi" title="Permalink to this headline">¶</a></h2>
+<p>The motherboard comes with IPMI enabled through either a separate network
+interface or shared with on of the normal 1 GB Ethernet connections. We really
+don’t need it in our case, but it’s there and we have to secure it.</p>
+<p>In our set, IPMI gets an address at boot via DHCP, for example something like
+192.168.13.117. Write it down from the boot screen and then when the server is
+powered up, use a web browser to access the IPMI interface.</p>
+<p>The most important thing is to change the default Supermicro user name and
+password from ADMIN/ADMIN do something different.</p>
+<div class="section" id="links">
+<h3>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://www.servethehome.com/basic-bmc-and-ipmi-management-security-practices/">https://www.servethehome.com/basic-bmc-and-ipmi-management-security-practices/</a></p>
+</div>
+</div>
+<div class="section" id="bios">
+<h2>BIOS<a class="headerlink" href="#bios" title="Permalink to this headline">¶</a></h2>
+<p>Make sure that <strong>virtualization support</strong> is enabled. Also, the <strong>boot order</strong>
+can be tricky to get right.</p>
+</div>
+<div class="section" id="lsi-interface">
+<h2>LSI interface<a class="headerlink" href="#lsi-interface" title="Permalink to this headline">¶</a></h2>
+<p>The 16 SATA port interface card will show its own boot screen during startup. We
+do not need to change anything. Note the X10SDV-4C-7TP4F only includes the
+“dumb” IT mode, so we don’t have to flash the BIOS to avoid hardware RAID
+configurations.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#motherboard">Motherboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drives">Drives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extra-cooling-fan">Extra cooling fan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-hardware">Other hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ipmi">IPMI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bios">BIOS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lsi-interface">LSI interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="goals.html" title="previous chapter">Goals</a></li>
+      <li>Next: <a href="os.html" title="next chapter">Ubuntu Server</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/hardware.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

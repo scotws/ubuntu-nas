@@ -1,0 +1,179 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Rsync &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Firewall" href="firewall.html" />
+    <link rel="prev" title="Snapshots" href="snapshots.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="rsync">
+<h1>Rsync<a class="headerlink" href="#rsync" title="Permalink to this headline">¶</a></h1>
+<p>We use rsync for backups from the Linux computers to the NAS.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is a rather crude way of doing things, left over from earlier
+setups. In future versions, this will probably be replaced by <code class="docutils literal notranslate"><span class="pre">zfs</span>
+<span class="pre">send/receive</span></code> or Syncoid (<a class="reference external" href="https://github.com/jimsalterjrs/sanoid">https://github.com/jimsalterjrs/sanoid</a>)</p>
+</div>
+<p>In the user file <code class="docutils literal notranslate"><span class="pre">/home/user1/rsync_home.sh</span></code> we put:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="n">rsync</span> <span class="o">-</span><span class="n">az</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;ssh -p 2019&#39;</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span><span class="o">.</span><span class="n">steam</span><span class="p">,</span><span class="o">.</span><span class="n">zfs</span><span class="p">,</span><span class="o">.</span><span class="n">dbus</span><span class="p">,</span><span class="n">go</span><span class="p">,</span><span class="n">snap</span><span class="p">}</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">user1</span><span class="o">/</span> <span class="n">user1</span><span class="nd">@home</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user1</span><span class="o">/</span><span class="n">bku_chell</span>
+</pre></div>
+</div>
+<p>We can test this with the rsync <code class="docutils literal notranslate"><span class="pre">vn</span></code> flags to be certain. Then, add crontab
+job with <code class="docutils literal notranslate"><span class="pre">crontab</span> <span class="pre">-e</span></code>:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">05</span> <span class="mi">17</span>  <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">user1</span><span class="o">/</span><span class="n">rsync_home</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>For the other users, we need to generate ssh keys, such as user2. Then, on home as that user:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">.</span><span class="n">ssh</span>
+<span class="n">vi</span> <span class="o">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
+</pre></div>
+</div>
+<p>Copy the public key <code class="docutils literal notranslate"><span class="pre">id_rsa.pub</span></code> content to that file. To test, run</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">home</span><span class="o">.</span><span class="n">local</span> <span class="o">-</span><span class="n">p</span> <span class="mi">2019</span>
+</pre></div>
+</div>
+<p>once from user2’s account. Then, test as above (with nv) options:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rsync</span> <span class="o">-</span><span class="n">az</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;ssh -p 2019&#39;</span> <span class="o">--</span><span class="n">delete</span> <span class="o">--</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span><span class="o">.</span><span class="n">steam</span><span class="p">,</span><span class="o">.</span><span class="n">zfs</span><span class="p">,</span><span class="o">.</span><span class="n">dbus</span><span class="p">,</span><span class="n">snap</span><span class="p">}</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">user2</span><span class="o">/</span> <span class="n">user2</span><span class="nd">@home</span><span class="o">.</span><span class="n">local</span><span class="p">:</span><span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user2</span><span class="o">/</span><span class="n">bku_chell</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This line is the reason we do not issue a banner with sshd.</p>
+</div>
+<p>If that works, put it into a shell script like for user1 with a slightly different time:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">25</span> <span class="mi">17</span> <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">user2</span><span class="o">/</span><span class="n">rsync_home</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Repeat the process with other users.</p>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/">https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/</a></li>
+<li><a class="reference external" href="https://jrs-s.net/2016/09/15/zfs-snapshots-and-cold-storage/">https://jrs-s.net/2016/09/15/zfs-snapshots-and-cold-storage/</a></li>
+<li><a class="reference external" href="https://blog.fosketts.net/2016/08/18/migrating-data-zfs-send-receive/">https://blog.fosketts.net/2016/08/18/migrating-data-zfs-send-receive/</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals and objectives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Rsync</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="snapshots.html" title="previous chapter">Snapshots</a></li>
+      <li>Next: <a href="firewall.html" title="next chapter">Firewall</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/rsync.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

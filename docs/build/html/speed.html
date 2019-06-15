@@ -1,0 +1,208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Speed &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tests" href="tests.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="speed">
+<h1>Speed<a class="headerlink" href="#speed" title="Permalink to this headline">¶</a></h1>
+<p>These are tests performed with a 1 GBit Ethernet connection. To test the
+connection speed with iperf, install it first on both machines, chell and home.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">iperf3</span>
+</pre></div>
+</div>
+<p>On home, start the server (<code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">M</span></code> gives format in MB/sec)</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iperf3</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">f</span> <span class="n">M</span>
+</pre></div>
+</div>
+<p>Now iperf will tell us which port it is listening at. We have to open the
+firewall for testing:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ufw</span> <span class="n">allow</span> <span class="mi">5201</span>
+</pre></div>
+</div>
+<p>On chell, start the client with :</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iperf3</span> <span class="o">-</span><span class="n">f</span> <span class="n">M</span> <span class="o">-</span><span class="n">c</span> <span class="n">home</span><span class="o">.</span><span class="n">local</span>
+</pre></div>
+</div>
+<p>This gives us <strong>112 MB/sec</strong> for memory-to-memory transfers, as expected over a
+1 GBit Ethernet connection. Disk to memory test gives us the same thing, with
+this on chell (the sender):</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iperf3</span> <span class="o">-</span><span class="n">f</span> <span class="n">M</span> <span class="o">-</span><span class="n">c</span> <span class="n">home</span><span class="o">.</span><span class="n">local</span> <span class="o">-</span><span class="n">i1</span> <span class="o">-</span><span class="n">t</span> <span class="mi">40</span>
+</pre></div>
+</div>
+<p>For memory-to-disk, we start the server on home (with CWD as <code class="docutils literal notranslate"><span class="pre">/home/user1</span></code> on an SSD)</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iperf3</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">f</span> <span class="n">M</span> <span class="o">-</span><span class="n">F</span> <span class="n">test</span>
+</pre></div>
+</div>
+<p>the receiving end. This gives us about <strong>13.4 MB/sec</strong> from memory to a SSD. We can
+also test with storing the data on one of the ZFS pool datasets (currently 2 x
+RaidZ three-disk VDEV) :</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iperf3</span> <span class="o">-</span><span class="n">s</span> <span class="o">-</span><span class="n">f</span> <span class="n">M</span> <span class="o">-</span><span class="n">F</span> <span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user1</span><span class="o">/</span><span class="n">test</span>
+</pre></div>
+</div>
+<p>This gives us <strong>9.7 MB/sec</strong> from memory to HD RaidZ.</p>
+<p>On home, remember to close the firewall again and to delete the test files,</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">ufw</span> <span class="n">deny</span> <span class="mi">5201</span>
+<span class="n">rm</span> <span class="n">test</span>
+<span class="n">rm</span> <span class="o">/</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user1</span><span class="o">/</span><span class="n">test</span>
+</pre></div>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="46%" />
+<col width="22%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">Network</th>
+<th class="head">Speed</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mem-to-mem</td>
+<td>1 GBit</td>
+<td>112 MB/sec</td>
+</tr>
+<tr class="row-odd"><td>mem-to-ssd (ext4)</td>
+<td>1 GBit</td>
+<td>13.4 MB/sec</td>
+</tr>
+<tr class="row-even"><td>mem-to-hd (ZFS)</td>
+<td>1 GBit</td>
+<td>9.7 MB/sec</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://fasterdata.es.net/performance-testing/network-troubleshooting-tools/iperf/disk-testing-using-iperf/">https://fasterdata.es.net/performance-testing/network-troubleshooting-tools/iperf/disk-testing-using-iperf/</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Speed</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tests.html" title="previous chapter">Tests</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/speed.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

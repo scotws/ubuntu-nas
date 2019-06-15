@@ -1,0 +1,164 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Introduction &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Goals" href="goals.html" />
+    <link rel="prev" title="Scot’s Ubuntu NAS with ZFS and Containers" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>In 2019, the motherboard of my FreeNAS server died. Instead of simply replacing
+it and continuing, I decided to switch to a self-created NAS based on Ubuntu
+Server 18.04 LTS with ZFS and containers (Docker). This document is based on the
+line-by line notes I made, and provided for anybody who is thinking about
+building such a system themselves.</p>
+<p>However, <strong>you probably don’t want to do this</strong>. I’m no server expert, this
+machine is set up for a very special use case and threat scenario, and this text
+doesn’t even attempt to provide a complete guide. One reason I wrote it, in
+fact, is to learn reStructured text, Sphinx, and Read the Docs for other
+projects.</p>
+<p>Still, if you feel you must, by all means read on.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Follow the instructions and suggestions in this text at your own
+risk. There is a very real chance that you could lose data, even all of
+it. I take no responsibility for anything bad or even mildly irritating
+that happens.</p>
+</div>
+<dl class="docutils">
+<dt>If you need more hand-holding:</dt>
+<dd><strong>FreeNAS</strong> (<a class="reference external" href="http://freenas.org">http://freenas.org</a>) comes with extensive documentation and a
+very helpful community. It served me well for years, and if I hadn’t
+being trying to learn more about servers and containers, I would have stayed
+with it. FreeNAS comes with the ZFS file system as well.</dd>
+<dt>If you need <em>lots</em> more hand-holding:</dt>
+<dd>There are a bunch of <strong>commercial NAS</strong> vendors, for example Synology or
+QNAP. Usually, you just need to add the drive and the setup does the
+rest; however, they rarely come with ZFS.</dd>
+<dt>If you need more power and features:</dt>
+<dd><strong>Ansible-NAS</strong> (<a class="reference external" href="https://github.com/davestephens/ansible-nas">https://github.com/davestephens/ansible-nas</a>) is a far more
+ambitious variant of a Ubuntu NAS by Dave Stephens. As the name says, it
+makes extensive use of Ansible for configuration, and comes with
+a higher level of configuration. Full disclosure: I have contributed to the
+documentation.</dd>
+</dl>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Scot’s Ubuntu NAS with ZFS and Containers</a></li>
+      <li>Next: <a href="goals.html" title="next chapter">Goals</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

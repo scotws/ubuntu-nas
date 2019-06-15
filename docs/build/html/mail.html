@@ -1,0 +1,202 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Mail &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SMART" href="smart.html" />
+    <link rel="prev" title="Users" href="users.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="mail">
+<h1>Mail<a class="headerlink" href="#mail" title="Permalink to this headline">¶</a></h1>
+<p>We need a basic mail setup to send notifications from ZFS and other systems in
+case of an error. We use Postfix.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">postfix</span>
+</pre></div>
+</div>
+<p>During setup, configure for an “Internet Site”. We use <code class="docutils literal notranslate"><span class="pre">home.local</span></code> as the
+sending address and <code class="docutils literal notranslate"><span class="pre">smtp.gmail.com:587</span></code> as the relay host. Go to
+<a class="reference external" href="https://myaccount.google.com/apppasswords">https://myaccount.google.com/apppasswords</a> to get a password for “chell mail” and
+create the file <code class="docutils literal notranslate"><span class="pre">/etc/postfix/sasl/sasl_passwd</span></code> with the content:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">smtp</span><span class="o">.</span><span class="n">gmail</span><span class="o">.</span><span class="n">com</span><span class="p">]:</span><span class="mi">587</span> <span class="o">&lt;</span><span class="n">USERNAME</span><span class="o">&gt;</span><span class="nd">@gmail</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="o">&lt;</span><span class="n">PASSWORD</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>This needs to be added to a data bank:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">postmap</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">postfix</span><span class="o">/</span><span class="n">sasl</span><span class="o">/</span><span class="n">sasl_passwd</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">/etc/postfix/main.cf</span></code>  set the line</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">relayhost</span> <span class="o">=</span> <span class="p">[</span><span class="n">smtp</span><span class="o">.</span><span class="n">gmail</span><span class="o">.</span><span class="n">com</span><span class="p">]:</span><span class="mi">587</span>
+</pre></div>
+</div>
+<p>Shorten the line with the banner to</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span>smtpd_banner = $myhostname ESMTP
+</pre></div>
+</div>
+<p>for security reasons. And add the bunch of lines</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable SASL authentication</span>
+<span class="n">smtp_sasl_auth_enable</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="c1"># Disallow methods that allow anonymous authentication</span>
+<span class="n">smtp_sasl_security_options</span> <span class="o">=</span> <span class="n">noanonymous</span>
+<span class="c1"># Location of sasl_passwd</span>
+<span class="n">smtp_sasl_password_maps</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">postfix</span><span class="o">/</span><span class="n">sasl</span><span class="o">/</span><span class="n">sasl_passwd</span>
+<span class="c1"># Enable STARTTLS encryption</span>
+<span class="n">smtp_tls_security_level</span> <span class="o">=</span> <span class="n">encrypt</span>
+<span class="c1"># Location of CA certificates</span>
+<span class="n">smtp_tls_CAfile</span> <span class="o">=</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span><span class="n">certs</span><span class="o">/</span><span class="n">ca</span><span class="o">-</span><span class="n">certificates</span><span class="o">.</span><span class="n">crt</span>
+</pre></div>
+</div>
+<p>Edit aliases file with <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">vi</span> <span class="pre">/etc/aliases</span></code> so it reads:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">postmaster</span><span class="p">:</span> <span class="n">root</span>
+<span class="n">admin</span><span class="p">:</span> <span class="n">root</span>
+<span class="n">ubuntu</span><span class="p">:</span> <span class="n">root</span>
+<span class="n">root</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">USERNAME</span><span class="o">&gt;</span><span class="nd">@gmail</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<p>The run sudo newaliases for the databank file and sudo systemctl restart postfix. Test with a mail that ends with a dot:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sendmail</span> <span class="o">&lt;</span><span class="n">USERNAME</span><span class="o">&gt;</span><span class="nd">@gmail</span><span class="o">.</span><span class="n">com</span>
+<span class="n">From</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">USERNAME</span><span class="o">&gt;@&lt;</span><span class="n">OTHER_ADDRESS</span><span class="o">&gt;</span>
+<span class="n">Subject</span><span class="p">:</span> <span class="n">Test</span> <span class="n">mail</span>
+<span class="n">This</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">test</span> <span class="n">email</span>
+</pre></div>
+</div>
+<p>This is basic mail setup. We need the mailutils package for further use.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">mailutils</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>This setup will now allow us to send all kinds of mail with</p>
+<div class="code last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mail</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;&lt;SUBJECT&gt;&quot;</span> <span class="n">the</span><span class="o">.</span><span class="n">address</span><span class="nd">@the</span><span class="o">.</span><span class="n">address</span>
+<span class="o">&lt;</span><span class="n">MORE</span> <span class="n">TEXT</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">CTRL</span><span class="o">&gt;-</span><span class="n">d</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://www.linode.com/docs/email/postfix/configure-postfix-to-send-mail-using-gmail-and-google-apps-on-debian-or-ubuntu/">https://www.linode.com/docs/email/postfix/configure-postfix-to-send-mail-using-gmail-and-google-apps-on-debian-or-ubuntu/</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals and objectives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mail</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snapshots.html">Snapshots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="users.html" title="previous chapter">Users</a></li>
+      <li>Next: <a href="smart.html" title="next chapter">SMART</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/mail.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

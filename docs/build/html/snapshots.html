@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Snapshots &#8212; A Small Ubuntu NAS 0.1.0beta documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Rsync" href="rsync.html" />
+    <link rel="prev" title="NFS" href="nfs.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="snapshots">
+<h1>Snapshots<a class="headerlink" href="#snapshots" title="Permalink to this headline">¶</a></h1>
+<p>We use Sanoid <a class="reference external" href="https://github.com/jimsalterjrs/sanoid">https://github.com/jimsalterjrs/sanoid</a> to automatically create and
+prune ZFS snapshots. Note this is a backup server, so we don’t need hourly
+snapshots for the users because we’re only fed their stuff once a day anyway.</p>
+<p>Sanoid is not part of the Ubuntu distribution, so we need to set it up from the
+GitHub repository.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libconfig</span><span class="o">-</span><span class="n">inifiles</span><span class="o">-</span><span class="n">perl</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">opt</span>
+<span class="n">sudo</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jimsalterjrs</span><span class="o">/</span><span class="n">sanoid</span>
+<span class="n">sudo</span> <span class="n">ln</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">sanoid</span><span class="o">/</span><span class="n">sanoid</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span>
+<span class="n">sudo</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sanoid</span>
+<span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">sanoid</span><span class="o">/</span><span class="n">sanoid</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sanoid</span><span class="o">/</span><span class="n">sanoid</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">sudo</span> <span class="n">cp</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">sanoid</span><span class="o">/</span><span class="n">sanoid</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">conf</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sanoid</span><span class="o">/</span><span class="n">sanoid</span><span class="o">.</span><span class="n">defaults</span><span class="o">.</span><span class="n">conf</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">/etc/sanoid.conf</span></code> we have the templates and the datasets they refer to.</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">coldstore</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">archive</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user3</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">slacker</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user2</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">backup</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user1</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">busybee</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">h_user4</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">slacker</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">media</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">archive</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">pictures</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">archive</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">storage</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">archive</span>
+
+<span class="p">[</span><span class="n">tank</span><span class="o">/</span><span class="n">texts</span><span class="p">]</span>
+        <span class="n">use_template</span> <span class="o">=</span> <span class="n">archive</span>
+
+
+<span class="c1">### TEMPLATES ####</span>
+
+<span class="c1"># User who only occasionally logs in. We want to be able to catch when they</span>
+<span class="c1"># come the next day and says &quot;dude, I lost my file&quot;</span>
+<span class="p">[</span><span class="n">template_slacker</span><span class="p">]</span>
+        <span class="n">frequently</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hourly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">daily</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="n">weekly</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">monthly</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">yearly</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">autosnap</span> <span class="o">=</span> <span class="n">yes</span>
+        <span class="n">autoprune</span> <span class="o">=</span> <span class="n">yes</span>
+
+<span class="c1"># User who does a lot of work and could lose a lot</span>
+<span class="p">[</span><span class="n">template_busybee</span><span class="p">]</span>
+        <span class="n">frequently</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hourly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">daily</span> <span class="o">=</span> <span class="mi">31</span>
+        <span class="n">weekly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">monthly</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="n">yearly</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">autosnap</span> <span class="o">=</span> <span class="n">yes</span>
+        <span class="n">autoprune</span> <span class="o">=</span> <span class="n">yes</span>
+
+<span class="c1"># Backup for people whose data comes from outside and is transferred by rsync.</span>
+<span class="p">[</span><span class="n">template_backup</span><span class="p">]</span>
+        <span class="n">frequently</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hourly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">daily</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="n">weekly</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">monthly</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="n">yearly</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">autosnap</span> <span class="o">=</span> <span class="n">yes</span>
+        <span class="n">autoprune</span> <span class="o">=</span> <span class="n">yes</span>
+
+<span class="c1"># Backup for media files and other archived data. We usually don&#39;t</span>
+<span class="c1"># delete anything in these datasets, but only add stuff, so we want</span>
+<span class="c1"># to avoid cryptolocker attacks and catch &quot;oops&quot; accidents.</span>
+<span class="p">[</span><span class="n">template_archive</span><span class="p">]</span>
+        <span class="n">frequently</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hourly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">daily</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">weekly</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">monthly</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">yearly</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">autosnap</span> <span class="o">=</span> <span class="n">yes</span>
+        <span class="n">autoprune</span> <span class="o">=</span> <span class="n">yes</span>
+</pre></div>
+</div>
+<p>Edit <code class="docutils literal notranslate"><span class="pre">/etc/crontab</span></code> by hand (we don’t care about skipping one hour during
+daylight savings transition):</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">*/</span><span class="mi">5</span> <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="n">root</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">sanoid</span> <span class="o">--</span><span class="n">cron</span>
+</pre></div>
+</div>
+<p>After about five minutes, you’ll see snapshots appearing when you run <code class="docutils literal notranslate"><span class="pre">zfs</span> <span class="pre">list</span>
+<span class="pre">-t</span> <span class="pre">snapshot</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The datasets used for Time Backups are not snapshotted.</p>
+</div>
+<div class="section" id="deleting-snapshots">
+<h2>Deleting snapshots<a class="headerlink" href="#deleting-snapshots" title="Permalink to this headline">¶</a></h2>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">-n</span></code> switch to test what we do before we do it. Format is</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zfs</span> <span class="n">destroy</span> <span class="o">-</span><span class="n">vn</span> <span class="o">&lt;</span><span class="n">FIRST</span><span class="o">-</span><span class="n">SNAPSHOT</span><span class="o">&gt;%&lt;</span><span class="n">LAST</span><span class="o">-</span><span class="n">SNAPSHOT</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Where last snapshot is only the part after the <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>. For example:</p>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">zfs</span> <span class="n">destroy</span> <span class="o">-</span><span class="n">vn</span> <span class="n">tank</span><span class="o">/</span><span class="n">h_user1</span><span class="nd">@auto</span><span class="o">-</span><span class="mf">20190303.0900</span><span class="o">-</span><span class="mi">3</span><span class="n">m</span><span class="o">%</span><span class="n">auto</span><span class="o">-</span><span class="mf">20190601.0900</span><span class="o">-</span><span class="mi">3</span><span class="n">m</span>
+</pre></div>
+</div>
+<p>This will also tell you how much space will be freed. Do this with without
+<code class="docutils literal notranslate"><span class="pre">-vn</span></code> to pull the trigger.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">A Small Ubuntu NAS</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="goals.html">Goals and objectives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="os.html">Ubuntu Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="livepatch.html">Livepatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services</a></li>
+<li class="toctree-l1"><a class="reference internal" href="users.html">Users</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mail.html">Mail</a></li>
+<li class="toctree-l1"><a class="reference internal" href="smart.html">SMART</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ups.html">UPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zfs.html">ZFS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nfs.html">NFS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Snapshots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#deleting-snapshots">Deleting snapshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rsync.html">Rsync</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firewall.html">Firewall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="speed.html">Speed</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="nfs.html" title="previous chapter">NFS</a></li>
+      <li>Next: <a href="rsync.html" title="next chapter">Rsync</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Scot W. Stevenson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/snapshots.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

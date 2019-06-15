@@ -49,7 +49,8 @@ Other hardware
         loves RAM and the maximum for the board is 128 GB, this should be enough
         for our use. 
 
-**Graphics:** In contrast to the usual setup with servers, there is an old 4:3
+**Graphics:** VGA built-in
+        In contrast to the usual setup with servers, there is an old 4:3
         monitor attached with VGA. Also, there is keyboard. Both are in the same
         room as the main computer. This means we can do stuff directly at the
         console which otherwise would require ssh.
@@ -67,14 +68,14 @@ IPMI
 
 The motherboard comes with IPMI enabled through either a separate network
 interface or shared with on of the normal 1 GB Ethernet connections. We really
-don't need it in our case, but it's there and we have to secure it.
+don't need it, but it's there and we have to secure it.
 
 In our set, IPMI gets an address at boot via DHCP, for example something like
-192.168.13.117. Write it down from the boot screen and then when the server is
+192.168.13.100. Write it down from the boot screen and then when the server is
 powered up, use a web browser to access the IPMI interface.
 
 The most important thing is to change the default Supermicro user name and
-password from ADMIN/ADMIN do something different. 
+password from ``ADMIN/ADMIN`` to something different. 
 
 Links
 ~~~~~
@@ -95,6 +96,4 @@ LSI interface
 The 16 SATA port interface card will show its own boot screen during startup. We
 do not need to change anything. Note the X10SDV-4C-7TP4F only includes the
 "dumb" IT mode, so we don't have to flash the BIOS to avoid hardware RAID
-configurations.
-
-
+configurations which just get in ZFS' way.

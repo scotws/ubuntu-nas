@@ -38,4 +38,7 @@ If you need more power and features:
         a higher level of configuration. Full disclosure: I have contributed to the
         documentation.
 
+The actual files for this text live at https://github.com/scotws/ubuntu-nas. For
+suggestions, corrections, and additions, please create a pull request there.
+
 License: CC-BY-SA-4.0 (https://creativecommons.org/licenses/by-sa/4.0/)

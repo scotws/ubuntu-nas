@@ -9,9 +9,9 @@ is just documentation, there is no code.** It is provided here in case it proves
 helpful for other people looking to build their own NAS from scratch. 
 
 Note that this is just the GitHub repository for the raw files. The documents
-themselves are best read at Read the Docs. In fact, one major goal of this text
-was to experiment with reStructured text, Sphinix, and Read the Docs for other
-projects.
+themselves are best read at Read the Docs at https://ubuntu-nas.readthedocs.io/
+. In fact, one major goal of this text was to experiment with reStructured text,
+Sphinix, and Read the Docs for other projects.
 
 ## Liability
 

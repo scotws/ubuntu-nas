@@ -9,19 +9,19 @@ is just documentation, there is no code.** It is provided here in case it proves
 helpful for other people looking to build their own NAS from scratch. 
 
 Note that this is just the GitHub repository for the raw files. The documents
-themselves are best read at Read the Docs at https://ubuntu-nas.readthedocs.io/
-. In fact, one major goal of this text was to experiment with reStructured text,
+themselves are best read at Read the Docs at https://ubuntu-nas.readthedocs.io/.
+In fact, one major goal of this text was to experiment with reStructured text,
 Sphinix, and Read the Docs for other projects.
 
 ## Liability
 
 Follow these steps at your own risk. The guide is for my own personal system
 (which some changes for security reasons) and probably will not work for yours.
-It most like also contains errors, and is certainly not a state of the art way
+It most likely also contains errors, and is certainly not a state of the art way
 to build a server. This system is used in a low-threat environment, and security
 is not a priority. Also, I'm not a computer professional. In other words, I take
 no responsibility, especially if you lose your data, which is a very real
-posibility. 
+posibility. Be scared.
 
 ## Errors and updates
 

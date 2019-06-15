@@ -38,3 +38,4 @@ If you need more power and features:
         a higher level of configuration. Full disclosure: I have contributed to the
         documentation.
 
+License: CC-BY-SA-4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
